@@ -368,8 +368,7 @@ final class MenuBarController: NSObject, ObservableObject {
         // Surveillance des changements de raccourci (redémarrage nécessaire)
         settingsManager.$shortcutOpenHistory
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                guard let self = self else { return }
+            .sink { _ in
                 // Traitement lors du changement de paramètre
                 // Note: redémarrage requis pour appliquer les nouveaux raccourcis
             }
