@@ -176,18 +176,18 @@ final class PermissionManager {
         NSWorkspace.shared.open(url)
     }
 
-    /// 権限リクエストアラートを表示
+    /// Alerte de demande de permission
     func showPermissionAlert() {
         let alert = NSAlert()
-        alert.messageText = "フルディスクアクセスが必要です"
+        alert.messageText = "Accès complet au disque requis"
         alert.informativeText = """
-        Notiponが通知履歴を読み取るには、フルディスクアクセス権限が必要です。
+        Notipon a besoin d'un accès complet au disque pour lire l'historique des notifications.
 
-        システム設定 > プライバシーとセキュリティ > フルディスクアクセス から Notipon を追加してください。
+        Veuillez ajouter Notipon dans Réglages Système > Confidentialité et sécurité > Accès complet au disque.
         """
         alert.alertStyle = .warning
-        alert.addButton(withTitle: "設定を開く")
-        alert.addButton(withTitle: "後で")
+        alert.addButton(withTitle: "Ouvrir les réglages")
+        alert.addButton(withTitle: "Plus tard")
 
         if alert.runModal() == .alertFirstButtonReturn {
             openSecurityPreferences()
@@ -203,9 +203,9 @@ final class PermissionManager {
 
         var description: String {
             switch self {
-            case .granted: return "許可済み"
-            case .denied: return "拒否"
-            case .notDetermined: return "未設定"
+            case .granted: return "Autorisé"
+            case .denied: return "Refusé"
+            case .notDetermined: return "Non configuré"
             }
         }
     }
