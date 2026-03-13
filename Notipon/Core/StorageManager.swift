@@ -2,7 +2,8 @@ import Foundation
 import GRDB
 import Combine
 
-/// ローカルストレージ管理（GRDB）
+/// Gestionnaire de stockage local (GRDB)
+@MainActor
 final class StorageManager: ObservableObject {
     static let shared = StorageManager()
 

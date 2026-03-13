@@ -76,11 +76,12 @@ final class MenuBarController: NSObject, ObservableObject {
         )
         hoverPopover.behavior = .semitransient
         hoverPopover.animates = true
-        hoverPopover.contentViewController = NSHostingController(
-            rootView: HoverPreviewView()
-                .environmentObject(storageManager)
-                .environmentObject(settingsManager)
-        )
+
+        // Créer le hosting controller sans closure capturant self
+        let hoverView = HoverPreviewView()
+            .environmentObject(StorageManager.shared)
+            .environmentObject(SettingsManager.shared)
+        hoverPopover.contentViewController = NSHostingController(rootView: hoverView)
 
         // Menu déroulant
         dropdownPopover = NSPopover()
@@ -90,14 +91,15 @@ final class MenuBarController: NSObject, ObservableObject {
         )
         dropdownPopover.behavior = .transient
         dropdownPopover.animates = true
-        dropdownPopover.contentViewController = NSHostingController(
-            rootView: DropdownView(
-                onOpenHistory: { [weak self] in self?.openHistoryWindow() },
-                onOpenSettings: { [weak self] in self?.openSettings() }
-            )
-            .environmentObject(storageManager)
-            .environmentObject(settingsManager)
+
+        // Créer le hosting controller avec weak self
+        let dropdownView = DropdownView(
+            onOpenHistory: { [weak self] in self?.openHistoryWindow() },
+            onOpenSettings: { [weak self] in self?.openSettings() }
         )
+        .environmentObject(StorageManager.shared)
+        .environmentObject(SettingsManager.shared)
+        dropdownPopover.contentViewController = NSHostingController(rootView: dropdownView)
     }
 
     // MARK: - Mise à jour de l'icône
@@ -345,9 +347,11 @@ final class MenuBarController: NSObject, ObservableObject {
 
     // MARK: - Raccourcis clavier globaux
 
+    private var keyDownMonitor: Any?
+
     private func setupGlobalHotkeys() {
         // Raccourci pour ouvrir la fenêtre d'historique (depuis les paramètres)
-        NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
+        keyDownMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
             guard let self = self else { return event }
 
             let shortcut = self.settingsManager.shortcutOpenHistory
@@ -364,11 +368,20 @@ final class MenuBarController: NSObject, ObservableObject {
         // Surveillance des changements de raccourci (redémarrage nécessaire)
         settingsManager.$shortcutOpenHistory
             .receive(on: DispatchQueue.main)
-            .sink { _ in
-                // Traitement lors du changement de paramètre (implémenter si nécessaire)
+            .sink { [weak self] _ in
+                guard let self = self else { return }
+                // Traitement lors du changement de paramètre
                 // Note: redémarrage requis pour appliquer les nouveaux raccourcis
             }
             .store(in: &cancellables)
+    }
+
+    deinit {
+        if let monitor = keyDownMonitor {
+            NSEvent.removeMonitor(monitor)
+        }
+        hoverTimer?.invalidate()
+        pollingTimer?.invalidate()
     }
 }
 
