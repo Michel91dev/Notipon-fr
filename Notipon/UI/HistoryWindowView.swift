@@ -51,7 +51,12 @@ struct HistoryWindowView: View {
         .alert("Supprimer tout l'historique", isPresented: $showingDeleteConfirmation) {
             Button("Annuler", role: .cancel) {}
             Button("Supprimer", role: .destructive) {
-                try? storageManager.deleteAll()
+                do {
+                    try storageManager.deleteAll()
+                    print("[HistoryWindowView] Suppression de toutes les notifications réussie")
+                } catch {
+                    print("[HistoryWindowView] ERREUR lors de la suppression: \(error)")
+                }
             }
         } message: {
             Text("Supprimer tout l'historique des notifications. Cette action est irréversible.")

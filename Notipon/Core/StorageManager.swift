@@ -160,12 +160,19 @@ final class StorageManager: ObservableObject {
         updateStorageInfo()
     }
 
-    /// 全ての通知を削除
+    /// Supprimer toutes les notifications
     func deleteAll() throws {
+        print("[StorageManager] Tentative de suppression de toutes les notifications...")
+
         try dbQueue?.write { db in
+            let countBefore = try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM notifications") ?? 0
+            print("[StorageManager] Nombre de notifications avant suppression: \(countBefore)")
+
             try db.execute(sql: "DELETE FROM notifications")
-            // データベースファイルを最適化・圧縮
+            // Optimiser et compresser le fichier de base de données
             try db.execute(sql: "VACUUM")
+
+            print("[StorageManager] Suppression réussie")
         }
         refreshNotifications()
         updateStorageInfo()
