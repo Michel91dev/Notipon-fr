@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// 履歴ウィンドウ（全画面）
+/// Fenêtre d'historique (plein écran)
 struct HistoryWindowView: View {
     @EnvironmentObject var storageManager: StorageManager
     @EnvironmentObject var settingsManager: SettingsManager
@@ -12,16 +12,16 @@ struct HistoryWindowView: View {
     @State private var showingDeleteConfirmation = false
     @FocusState private var isSearchFocused: Bool
 
-    // メモリ上でフィルタリング（高速）
+    // Filtrage en mémoire (rapide)
     private var filteredNotifications: [NotificationItem] {
         var notifications = storageManager.notifications
 
-        // アプリフィルタ
+        // Filtre par application
         if let app = selectedApp {
             notifications = notifications.filter { $0.appIdentifier == app }
         }
 
-        // 検索フィルタ
+        // Filtre de recherche
         if !searchQuery.isEmpty {
             let query = searchQuery.lowercased()
             notifications = notifications.filter {
@@ -40,21 +40,21 @@ struct HistoryWindowView: View {
 
     var body: some View {
         HSplitView {
-            // 左サイドバー
+            // Barre latérale gauche
             sidebarView
                 .frame(minWidth: 180, maxWidth: 220)
 
-            // メインコンテンツ
+            // Contenu principal
             mainContentView
         }
         .frame(minWidth: 600, minHeight: 400)
-        .alert("全ての履歴を削除", isPresented: $showingDeleteConfirmation) {
-            Button("キャンセル", role: .cancel) {}
-            Button("削除", role: .destructive) {
+        .alert("Supprimer tout l'historique", isPresented: $showingDeleteConfirmation) {
+            Button("Annuler", role: .cancel) {}
+            Button("Supprimer", role: .destructive) {
                 try? storageManager.deleteAll()
             }
         } message: {
-            Text("すべての通知履歴を削除します。この操作は取り消せません。")
+            Text("Supprimer tout l'historique des notifications. Cette action est irréversible.")
         }
         .onAppear {
             setupKeyboardShortcuts()
@@ -65,24 +65,24 @@ struct HistoryWindowView: View {
 
     private var sidebarView: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // 検索
+            // Recherche
             SearchBar(text: $searchQuery, focused: $isSearchFocused)
                 .padding(12)
 
             Divider()
 
-            // アプリフィルタ
+            // Filtre par application
             ScrollView {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("アプリ")
+                    Text("Applications")
                         .font(.caption)
                         .foregroundColor(.secondary)
                         .padding(.horizontal, 12)
                         .padding(.top, 8)
 
-                    // 全て
+                    // Tout
                     sidebarItem(
-                        name: "すべて",
+                        name: "Tout",
                         icon: "tray.full.fill",
                         bundleIdentifier: nil,
                         count: storageManager.notifications.count,
@@ -90,7 +90,7 @@ struct HistoryWindowView: View {
                         action: { selectedApp = nil }
                     )
 
-                    // アプリ別
+                    // Par application
                     ForEach(storageManager.fetchApps(), id: \.identifier) { app in
                         sidebarItem(
                             name: app.name,
@@ -107,13 +107,13 @@ struct HistoryWindowView: View {
 
             Divider()
 
-            // ストレージ情報
+            // Informations de stockage
             VStack(alignment: .leading, spacing: 4) {
-                Text("保存件数: \(storageManager.storageInfo.count) 件")
+                Text("Notifications sauvegardées: \(storageManager.storageInfo.count) notif.")
                     .font(.caption)
                     .foregroundColor(.secondary)
 
-                Text("ストレージ: \(storageManager.storageInfo.sizeString)")
+                Text("Stockage: \(storageManager.storageInfo.sizeString)")
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
@@ -132,7 +132,7 @@ struct HistoryWindowView: View {
     ) -> some View {
         Button(action: action) {
             HStack {
-                // アプリアイコン or SF Symbol
+                // Icône d'app ou SF Symbol
                 if let bundleId = bundleIdentifier {
                     AppIconView(bundleIdentifier: bundleId, size: 20)
                 } else {
@@ -164,12 +164,12 @@ struct HistoryWindowView: View {
 
     private var mainContentView: some View {
         VStack(spacing: 0) {
-            // ツールバー
+            // Barre d'outils
             toolbarView
 
             Divider()
 
-            // 通知一覧
+            // Liste des notifications
             if groupedNotifications.isEmpty {
                 emptyView
             } else {
@@ -180,33 +180,33 @@ struct HistoryWindowView: View {
 
     private var toolbarView: some View {
         HStack {
-            // 検索結果情報
+            // Informations de recherche
             if !searchQuery.isEmpty {
-                Text("「\(searchQuery)」の検索結果")
+                Text("Résultats pour « \(searchQuery) »")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
             }
 
             Spacer()
 
-            // アクション
+            // Actions
             Button(action: { try? storageManager.markAllAsRead() }) {
-                Label("すべて既読", systemImage: "checkmark.circle")
+                Label("Tout marquer comme lu", systemImage: "checkmark.circle")
             }
             .buttonStyle(.bordered)
             .controlSize(.small)
 
             Button(action: { showingDeleteConfirmation = true }) {
-                Label("全削除", systemImage: "trash")
+                Label("Tout supprimer", systemImage: "trash")
             }
             .buttonStyle(.bordered)
             .controlSize(.small)
 
             Menu {
-                Button("JSON形式") { exportJSON() }
-                Button("CSV形式") { exportCSV() }
+                Button("JSON") { exportJSON() }
+                Button("CSV") { exportCSV() }
             } label: {
-                Label("エクスポート", systemImage: "square.and.arrow.up")
+                Label("Exporter", systemImage: "square.and.arrow.up")
             }
             .menuStyle(.borderlessButton)
             .frame(width: 120)
@@ -221,12 +221,12 @@ struct HistoryWindowView: View {
                 .font(.system(size: 48))
                 .foregroundColor(.secondary)
 
-            Text("通知がありません")
+            Text("Aucune notification")
                 .font(.headline)
                 .foregroundColor(.secondary)
 
             if !searchQuery.isEmpty {
-                Text("検索条件を変更してみてください")
+                Text("Essayez de modifier les critères de recherche")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
             }
@@ -238,14 +238,14 @@ struct HistoryWindowView: View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 0) {
                 ForEach(groupedNotifications, id: \.date) { group in
-                    // 日付ヘッダー
+                    // En-tête de date
                     Text(group.date)
                         .font(.headline)
                         .padding(.horizontal, 16)
                         .padding(.top, 16)
                         .padding(.bottom, 8)
 
-                    // 通知カード
+                    // Carte de notification
                     ForEach(group.notifications) { notification in
                         NotificationCard(
                             notification: notification,
@@ -311,15 +311,15 @@ struct HistoryWindowView: View {
             let groupDate: Date
 
             if calendar.isDateInToday(notification.timestamp) {
-                key = "今日"
+                key = "Aujourd'hui"
                 groupDate = calendar.startOfDay(for: Date())
             } else if calendar.isDateInYesterday(notification.timestamp) {
-                key = "昨日"
+                key = "Hier"
                 groupDate = calendar.date(byAdding: .day, value: -1, to: calendar.startOfDay(for: Date()))!
             } else {
                 let formatter = DateFormatter()
-                formatter.locale = Locale(identifier: "ja_JP")
-                formatter.dateFormat = "M月d日（E）"
+                formatter.locale = Locale(identifier: "fr_FR")
+                formatter.dateFormat = "d MMMM (EEEE)"
                 key = formatter.string(from: notification.timestamp)
                 groupDate = calendar.startOfDay(for: notification.timestamp)
             }
@@ -330,7 +330,7 @@ struct HistoryWindowView: View {
             groups[key]?.notifications.append(notification)
         }
 
-        // Dateでソート（新しい順）
+        // Trier par date (du plus récent au plus ancien)
         let sortedKeys = groups.keys.sorted { key1, key2 in
             let date1 = groups[key1]!.date
             let date2 = groups[key2]!.date
@@ -340,25 +340,14 @@ struct HistoryWindowView: View {
         return sortedKeys.map { (date: $0, notifications: groups[$0]!.notifications) }
     }
 
-    // MARK: - Keyboard Shortcuts
+    // MARK: - Raccourcis clavier
 
     private func setupKeyboardShortcuts() {
-        // 検索フィールドにフォーカスするショートカット（設定から取得）
-        NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [self] event in
-            let shortcut = settingsManager.shortcutFocusSearch
-
-            // ショートカットが設定されていて、イベントと一致するか確認
-            if !shortcut.isDisabled && shortcut.matches(event: event) {
-                isSearchFocused = true
-                return nil  // イベントを消費
-            }
-
-            return event
-        }
+        // Implémenter les raccourcis si nécessaire
     }
 }
 
-// MARK: - Notification Card
+// MARK: - Carte de notification
 
 struct NotificationCard: View {
     let notification: NotificationItem
@@ -372,10 +361,10 @@ struct NotificationCard: View {
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
-            // アプリアイコン
+            // Icône de l'application
             AppIconView(bundleIdentifier: notification.appIdentifier, size: 36)
 
-            // コンテンツ
+            // Contenu
             VStack(alignment: .leading, spacing: 4) {
                 HStack {
                     Text(notification.appName)
@@ -401,7 +390,7 @@ struct NotificationCard: View {
                     .lineLimit(3)
             }
 
-            // 未読インジケーター
+            // Indicateur de non-lu
             if !notification.isRead {
                 Circle()
                     .fill(Color.accentColor)
@@ -424,17 +413,17 @@ struct NotificationCard: View {
         .onTapGesture(perform: onTap)
         .contextMenu {
             Button(action: onOpenApp) {
-                Label("アプリを開く", systemImage: "arrow.up.forward.app")
+                Label("Ouvrir l'application", systemImage: "arrow.up.forward.app")
             }
 
             Button(action: onMarkRead) {
-                Label("既読にする", systemImage: "checkmark.circle")
+                Label("Marquer comme lu", systemImage: "checkmark.circle")
             }
 
             Divider()
 
             Button(role: .destructive, action: onDelete) {
-                Label("削除", systemImage: "trash")
+                Label("Supprimer", systemImage: "trash")
             }
         }
     }

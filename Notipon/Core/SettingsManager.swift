@@ -2,7 +2,7 @@ import Foundation
 import Combine
 import AppKit
 
-/// 設定管理
+/// Gestionnaire des paramètres
 final class SettingsManager: ObservableObject {
     static let shared = SettingsManager()
 
@@ -18,7 +18,7 @@ final class SettingsManager: ObservableObject {
         static let hoverPreviewMode = "hoverPreviewMode"
         static let retentionPeriod = "retentionPeriod"
         static let excludedApps = "excludedApps"
-        // ポップアップ設定
+        // Paramètres du popup
         static let popupEnabled = "popupEnabled"
         static let popupX = "popupX"
         static let popupY = "popupY"
@@ -27,14 +27,14 @@ final class SettingsManager: ObservableObject {
         static let popupOpacity = "popupOpacity"
         static let popupDuration = "popupDuration"
         static let popupFontSize = "popupFontSize"
-        // ショートカット設定
+        // Paramètres des raccourcis
         static let shortcutOpenHistory = "shortcutOpenHistory"
         static let shortcutFocusSearch = "shortcutFocusSearch"
-        // ホバープレビュー設定
+        // Paramètres de l'aperçu au survol
         static let hoverPreviewWidth = "hoverPreviewWidth"
         static let hoverPreviewHeight = "hoverPreviewHeight"
         static let hoverPreviewFontSize = "hoverPreviewFontSize"
-        // ドロップダウン設定
+        // Paramètres du menu déroulant
         static let dropdownWidth = "dropdownWidth"
         static let dropdownHeight = "dropdownHeight"
         static let dropdownFontSize = "dropdownFontSize"
@@ -42,86 +42,86 @@ final class SettingsManager: ObservableObject {
 
     // MARK: - Published Properties
 
-    /// ログイン時に起動
+    /// Lancer à la connexion
     @Published var launchAtLogin: Bool {
         didSet { defaults.set(launchAtLogin, forKey: Keys.launchAtLogin) }
     }
 
-    /// 未読バッジを表示
+    /// Afficher le badge des non-lus
     @Published var showUnreadBadge: Bool {
         didSet { defaults.set(showUnreadBadge, forKey: Keys.showUnreadBadge) }
     }
 
-    /// 保存後、通知センターから自動削除
+    /// Supprimer automatiquement du Centre de notifications après sauvegarde
     @Published var autoDeleteFromNotificationCenter: Bool {
         didSet { defaults.set(autoDeleteFromNotificationCenter, forKey: Keys.autoDeleteFromNotificationCenter) }
     }
 
-    /// 削除までの遅延時間（秒）
+    /// Délai de suppression (secondes)
     @Published var deleteDelay: DeleteDelay {
         didSet { defaults.set(deleteDelay.rawValue, forKey: Keys.deleteDelay) }
     }
 
-    /// ホバープレビューの表示モード
+    /// Mode d'affichage de l'aperçu au survol
     @Published var hoverPreviewMode: HoverPreviewMode {
         didSet { defaults.set(hoverPreviewMode.rawValue, forKey: Keys.hoverPreviewMode) }
     }
 
-    /// 保存期間
+    /// Durée de conservation
     @Published var retentionPeriod: RetentionPeriod {
         didSet { defaults.set(retentionPeriod.rawValue, forKey: Keys.retentionPeriod) }
     }
 
-    /// 除外アプリのバンドルID一覧
+    /// Liste des identifiants de bundle des applications exclues
     @Published var excludedApps: [String] {
         didSet { defaults.set(excludedApps, forKey: Keys.excludedApps) }
     }
 
     // MARK: - Popup Settings
 
-    /// ポップアップ通知を有効にする
+    /// Activer les notifications popup
     @Published var popupEnabled: Bool {
         didSet { defaults.set(popupEnabled, forKey: Keys.popupEnabled) }
     }
 
-    /// ポップアップX座標
+    /// Coordonnée X du popup
     @Published var popupX: CGFloat {
         didSet { defaults.set(popupX, forKey: Keys.popupX) }
     }
 
-    /// ポップアップY座標
+    /// Coordonnée Y du popup
     @Published var popupY: CGFloat {
         didSet { defaults.set(popupY, forKey: Keys.popupY) }
     }
 
-    /// ポップアップ幅
+    /// Largeur du popup
     @Published var popupWidth: CGFloat {
         didSet { defaults.set(popupWidth, forKey: Keys.popupWidth) }
     }
 
-    /// ポップアップ高さ
+    /// Hauteur du popup
     @Published var popupHeight: CGFloat {
         didSet { defaults.set(popupHeight, forKey: Keys.popupHeight) }
     }
 
-    /// ポップアップ透過率 (0.0-1.0)
+    /// Opacité du popup (0.0-1.0)
     @Published var popupOpacity: Double {
         didSet { defaults.set(popupOpacity, forKey: Keys.popupOpacity) }
     }
 
-    /// ポップアップ表示時間（秒、0=消えない）
+    /// Durée d'affichage du popup (secondes, 0=jamais)
     @Published var popupDuration: Int {
         didSet { defaults.set(popupDuration, forKey: Keys.popupDuration) }
     }
 
-    /// ポップアップ文字サイズ
+    /// Taille de la police du popup
     @Published var popupFontSize: CGFloat {
         didSet { defaults.set(Double(popupFontSize), forKey: Keys.popupFontSize) }
     }
 
     // MARK: - Keyboard Shortcuts
 
-    /// 履歴ウィンドウを開くショートカット
+    /// Raccourci pour ouvrir la fenêtre d'historique
     @Published var shortcutOpenHistory: KeyboardShortcut {
         didSet {
             if let data = try? JSONEncoder().encode(shortcutOpenHistory) {
@@ -130,7 +130,7 @@ final class SettingsManager: ObservableObject {
         }
     }
 
-    /// 検索フィールドにフォーカスするショートカット
+    /// Raccourci pour focus sur le champ de recherche
     @Published var shortcutFocusSearch: KeyboardShortcut {
         didSet {
             if let data = try? JSONEncoder().encode(shortcutFocusSearch) {
@@ -141,34 +141,34 @@ final class SettingsManager: ObservableObject {
 
     // MARK: - Hover Preview Settings
 
-    /// ホバープレビュー幅
+    /// Largeur de l'aperçu au survol
     @Published var hoverPreviewWidth: CGFloat {
         didSet { defaults.set(hoverPreviewWidth, forKey: Keys.hoverPreviewWidth) }
     }
 
-    /// ホバープレビュー高さ
+    /// Hauteur de l'aperçu au survol
     @Published var hoverPreviewHeight: CGFloat {
         didSet { defaults.set(hoverPreviewHeight, forKey: Keys.hoverPreviewHeight) }
     }
 
-    /// ホバープレビュー文字サイズ
+    /// Taille de la police de l'aperçu au survol
     @Published var hoverPreviewFontSize: CGFloat {
         didSet { defaults.set(Double(hoverPreviewFontSize), forKey: Keys.hoverPreviewFontSize) }
     }
 
     // MARK: - Dropdown Settings
 
-    /// ドロップダウン幅
+    /// Largeur du menu déroulant
     @Published var dropdownWidth: CGFloat {
         didSet { defaults.set(dropdownWidth, forKey: Keys.dropdownWidth) }
     }
 
-    /// ドロップダウン高さ
+    /// Hauteur du menu déroulant
     @Published var dropdownHeight: CGFloat {
         didSet { defaults.set(dropdownHeight, forKey: Keys.dropdownHeight) }
     }
 
-    /// ドロップダウン文字サイズ
+    /// Taille de la police du menu déroulant
     @Published var dropdownFontSize: CGFloat {
         didSet { defaults.set(Double(dropdownFontSize), forKey: Keys.dropdownFontSize) }
     }
@@ -182,9 +182,9 @@ final class SettingsManager: ObservableObject {
 
         var displayName: String {
             switch self {
-            case .immediately: return "即座に削除"
-            case .fiveSeconds: return "5秒後に削除"
-            case .oneMinute: return "1分後に削除"
+            case .immediately: return "Supprimer immédiatement"
+            case .fiveSeconds: return "Supprimer après 5 secondes"
+            case .oneMinute: return "Supprimer après 1 minute"
             }
         }
     }
@@ -195,8 +195,8 @@ final class SettingsManager: ObservableObject {
 
         var displayName: String {
             switch self {
-            case .recentFive: return "直近5件"
-            case .unreadOnly: return "未確認のみ"
+            case .recentFive: return "5 derniers"
+            case .unreadOnly: return "Non lus uniquement"
             }
         }
     }
@@ -209,10 +209,10 @@ final class SettingsManager: ObservableObject {
 
         var displayName: String {
             switch self {
-            case .oneDay: return "24時間"
-            case .oneWeek: return "7日間"
-            case .oneMonth: return "30日間"
-            case .unlimited: return "無制限"
+            case .oneDay: return "24 heures"
+            case .oneWeek: return "7 jours"
+            case .oneMonth: return "30 jours"
+            case .unlimited: return "Illimité"
             }
         }
 
@@ -252,17 +252,17 @@ final class SettingsManager: ObservableObject {
 
         excludedApps = defaults.stringArray(forKey: Keys.excludedApps) ?? []
 
-        // ポップアップ設定（デフォルト: 右上、350x100、透過率0.95、5秒）
+        // Paramètres du popup (défaut: haut-droite, 350x100, opacité 0.95, 5 sec)
         popupEnabled = defaults.object(forKey: Keys.popupEnabled) as? Bool ?? true
 
-        // 画面右上のデフォルト位置を計算
+        // Calculer la position par défaut en haut à droite de l'écran
         let screenFrame = NSScreen.main?.visibleFrame ?? NSRect(x: 0, y: 0, width: 1920, height: 1080)
         let defaultWidth: CGFloat = 350
         let defaultHeight: CGFloat = 100
         let defaultX = screenFrame.maxX - defaultWidth - 20
         let defaultY = screenFrame.maxY - defaultHeight - 20
 
-        // CGFloatはDoubleとして保存・読み込み
+        // CGFloat est sauvegardé/lu comme Double
         popupX = CGFloat(defaults.double(forKey: Keys.popupX) != 0 ? defaults.double(forKey: Keys.popupX) : defaultX)
         popupY = CGFloat(defaults.double(forKey: Keys.popupY) != 0 ? defaults.double(forKey: Keys.popupY) : defaultY)
         popupWidth = CGFloat(defaults.double(forKey: Keys.popupWidth) != 0 ? defaults.double(forKey: Keys.popupWidth) : defaultWidth)
@@ -271,7 +271,7 @@ final class SettingsManager: ObservableObject {
         popupDuration = defaults.object(forKey: Keys.popupDuration) as? Int ?? 5
         popupFontSize = CGFloat(defaults.double(forKey: Keys.popupFontSize) != 0 ? defaults.double(forKey: Keys.popupFontSize) : 14.0)
 
-        // ショートカット設定
+        // Paramètres des raccourcis
         if let data = defaults.data(forKey: Keys.shortcutOpenHistory),
            let shortcut = try? JSONDecoder().decode(KeyboardShortcut.self, from: data) {
             shortcutOpenHistory = shortcut
@@ -286,12 +286,12 @@ final class SettingsManager: ObservableObject {
             shortcutFocusSearch = .focusSearch
         }
 
-        // ホバープレビュー設定（デフォルト: 300x250、11pt）
+        // Paramètres de l'aperçu au survol (défaut: 300x250, 11pt)
         hoverPreviewWidth = CGFloat(defaults.double(forKey: Keys.hoverPreviewWidth) != 0 ? defaults.double(forKey: Keys.hoverPreviewWidth) : 300)
         hoverPreviewHeight = CGFloat(defaults.double(forKey: Keys.hoverPreviewHeight) != 0 ? defaults.double(forKey: Keys.hoverPreviewHeight) : 250)
         hoverPreviewFontSize = CGFloat(defaults.double(forKey: Keys.hoverPreviewFontSize) != 0 ? defaults.double(forKey: Keys.hoverPreviewFontSize) : 11.0)
 
-        // ドロップダウン設定（デフォルト: 360x500、13pt）
+        // Paramètres du menu déroulant (défaut: 360x500, 13pt)
         dropdownWidth = CGFloat(defaults.double(forKey: Keys.dropdownWidth) != 0 ? defaults.double(forKey: Keys.dropdownWidth) : 360)
         dropdownHeight = CGFloat(defaults.double(forKey: Keys.dropdownHeight) != 0 ? defaults.double(forKey: Keys.dropdownHeight) : 500)
         dropdownFontSize = CGFloat(defaults.double(forKey: Keys.dropdownFontSize) != 0 ? defaults.double(forKey: Keys.dropdownFontSize) : 13.0)
@@ -299,24 +299,24 @@ final class SettingsManager: ObservableObject {
 
     // MARK: - Methods
 
-    /// アプリを除外リストに追加
+    /// Ajouter une application à la liste des exclusions
     func addExcludedApp(_ bundleId: String) {
         if !excludedApps.contains(bundleId) {
             excludedApps.append(bundleId)
         }
     }
 
-    /// アプリを除外リストから削除
+    /// Retirer une application de la liste des exclusions
     func removeExcludedApp(_ bundleId: String) {
         excludedApps.removeAll { $0 == bundleId }
     }
 
-    /// アプリが除外されているか
+    /// Vérifier si une application est exclue
     func isAppExcluded(_ bundleId: String) -> Bool {
         excludedApps.contains(bundleId)
     }
 
-    /// 設定をリセット
+    /// Réinitialiser les paramètres
     func resetToDefaults() {
         launchAtLogin = false
         showUnreadBadge = true
@@ -326,7 +326,7 @@ final class SettingsManager: ObservableObject {
         retentionPeriod = .oneMonth
         excludedApps = []
 
-        // ポップアップ設定をリセット
+        // Réinitialiser les paramètres du popup
         popupEnabled = true
         let screenFrame = NSScreen.main?.visibleFrame ?? NSRect(x: 0, y: 0, width: 1920, height: 1080)
         popupWidth = 350
@@ -337,27 +337,27 @@ final class SettingsManager: ObservableObject {
         popupDuration = 5
         popupFontSize = 14
 
-        // ショートカット設定をリセット
+        // Réinitialiser les paramètres des raccourcis
         shortcutOpenHistory = .openHistory
         shortcutFocusSearch = .focusSearch
 
-        // ホバープレビュー設定をリセット
+        // Réinitialiser les paramètres de l'aperçu au survol
         hoverPreviewWidth = 300
         hoverPreviewHeight = 250
         hoverPreviewFontSize = 11.0
 
-        // ドロップダウン設定をリセット
+        // Réinitialiser les paramètres du menu déroulant
         dropdownWidth = 360
         dropdownHeight = 500
         dropdownFontSize = 13.0
     }
 
-    /// ポップアップの現在のフレームを取得
+    /// Obtenir le cadre actuel du popup
     var popupFrame: NSRect {
         NSRect(x: popupX, y: popupY, width: popupWidth, height: popupHeight)
     }
 
-    /// ポップアップのフレームを設定
+    /// Définir le cadre du popup
     func setPopupFrame(_ frame: NSRect) {
         popupX = frame.origin.x
         popupY = frame.origin.y

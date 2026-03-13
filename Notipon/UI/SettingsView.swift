@@ -1,7 +1,7 @@
 import SwiftUI
 import ServiceManagement
 
-/// 設定画面
+/// Écran des paramètres
 struct SettingsView: View {
     @EnvironmentObject var settingsManager: SettingsManager
     @EnvironmentObject var storageManager: StorageManager
@@ -13,7 +13,7 @@ struct SettingsView: View {
     @State private var loadTestError: String?
     @State private var loadTestCompleted = false
 
-    // 画面サイズ（ポップアップ位置スライダー用）
+    // Taille de l'écran (pour le slider de position du popup)
     private var maxScreenX: CGFloat {
         (NSScreen.main?.frame.width ?? 1920) - settingsManager.popupWidth
     }
@@ -23,31 +23,31 @@ struct SettingsView: View {
 
     var body: some View {
         Form {
-            // 一般設定
+            // Général
             generalSection
 
-            // キーボードショートカット
+            // Raccourcis clavier
             keyboardShortcutsSection
 
-            // 通知センター設定
+            // Centre de notifications
             notificationCenterSection
 
-            // ホバープレビュー設定
+            // Aperçu au survol
             hoverPreviewSection
 
-            // ドロップダウン設定
+            // Menu déroulant
             dropdownSection
 
-            // ポップアップ設定
+            // Popup personnalisé
             popupSection
 
-            // 保存期間設定
+            // Durée de conservation
             retentionSection
 
-            // 除外アプリ設定
+            // Applications exclues
             excludedAppsSection
 
-            // データ管理
+            // Données
             dataSection
 
             // About
@@ -55,32 +55,32 @@ struct SettingsView: View {
         }
         .formStyle(.grouped)
         .frame(width: 480, height: 800)
-        .alert("履歴をクリア", isPresented: $showingClearConfirmation) {
-            Button("キャンセル", role: .cancel) {}
-            Button("クリア", role: .destructive) {
+        .alert("Effacer l'historique", isPresented: $showingClearConfirmation) {
+            Button("Annuler", role: .cancel) {}
+            Button("Effacer", role: .destructive) {
                 try? storageManager.deleteAll()
             }
         } message: {
-            Text("すべての通知履歴を削除します。この操作は取り消せません。")
+            Text("Supprimer tout l'historique des notifications. Cette action est irréversible.")
         }
-        .alert("負荷テスト", isPresented: $showingLoadTestConfirmation) {
-            Button("キャンセル", role: .cancel) {}
-            Button("実行") {
+        .alert("Test de charge", isPresented: $showingLoadTestConfirmation) {
+            Button("Annuler", role: .cancel) {}
+            Button("Exécuter") {
                 runLoadTest()
             }
         } message: {
-            Text("1000件のテスト通知を生成します。データベースのサイズが増加します。よろしいですか？")
+            Text("Générer 1000 notifications de test. La taille de la base de données va augmenter. Continuer ?")
         }
-        .alert("負荷テスト完了", isPresented: $loadTestCompleted) {
+        .alert("Test de charge terminé", isPresented: $loadTestCompleted) {
             Button("OK") {
                 loadTestCompleted = false
                 loadTestError = nil
             }
         } message: {
             if let error = loadTestError {
-                Text("エラーが発生しました: \(error)")
+                Text("Une erreur s'est produite : \(error)")
             } else {
-                Text("1000件のテスト通知を生成しました。")
+                Text("1000 notifications de test générées.")
             }
         }
         .sheet(isPresented: $showingAddAppSheet) {
@@ -91,33 +91,33 @@ struct SettingsView: View {
     // MARK: - General
 
     private var generalSection: some View {
-        Section("一般") {
-            Toggle("ログイン時に起動", isOn: $settingsManager.launchAtLogin)
+        Section("Général") {
+            Toggle("Lancer à la connexion", isOn: $settingsManager.launchAtLogin)
                 .onChange(of: settingsManager.launchAtLogin) { newValue in
                     updateLoginItem(enabled: newValue)
                 }
 
-            Toggle("メニューバーに未読バッジを表示", isOn: $settingsManager.showUnreadBadge)
+            Toggle("Afficher le badge des non-lus dans la barre de menus", isOn: $settingsManager.showUnreadBadge)
         }
     }
 
-    // MARK: - Keyboard Shortcuts
+    // MARK: - Raccourcis clavier
 
     private var keyboardShortcutsSection: some View {
-        Section("キーボードショートカット") {
+        Section("Raccourcis clavier") {
             HStack {
-                Text("履歴ウィンドウを開く")
+                Text("Ouvrir la fenêtre d'historique")
                     .frame(width: 150, alignment: .leading)
                 KeyRecorderView(shortcut: $settingsManager.shortcutOpenHistory)
             }
 
             HStack {
-                Text("検索フィールドにフォーカス")
+                Text("Focus sur le champ de recherche")
                     .frame(width: 150, alignment: .leading)
                 KeyRecorderView(shortcut: $settingsManager.shortcutFocusSearch)
             }
 
-            Text("ショートカットを変更するには、ボタンをクリックしてキーを押してください。")
+            Text("Cliquez sur le bouton puis appuyez sur les touches pour modifier le raccourci.")
                 .font(.caption)
                 .foregroundColor(.secondary)
         }
@@ -126,11 +126,11 @@ struct SettingsView: View {
     // MARK: - Notification Center
 
     private var notificationCenterSection: some View {
-        Section("通知センター") {
-            Toggle("保存後、通知センターから自動削除", isOn: $settingsManager.autoDeleteFromNotificationCenter)
+        Section("Centre de notifications") {
+            Toggle("Supprimer automatiquement du Centre de notifications après sauvegarde", isOn: $settingsManager.autoDeleteFromNotificationCenter)
 
             if settingsManager.autoDeleteFromNotificationCenter {
-                Picker("削除タイミング", selection: $settingsManager.deleteDelay) {
+                Picker("Délai de suppression", selection: $settingsManager.deleteDelay) {
                     ForEach(SettingsManager.DeleteDelay.allCases, id: \.self) { delay in
                         Text(delay.displayName).tag(delay)
                     }
@@ -141,11 +141,11 @@ struct SettingsView: View {
         }
     }
 
-    // MARK: - Hover Preview
+    // MARK: - Aperçu au survol
 
     private var hoverPreviewSection: some View {
-        Section("ホバープレビュー") {
-            Picker("表示内容", selection: $settingsManager.hoverPreviewMode) {
+        Section("Aperçu au survol") {
+            Picker("Contenu affiché", selection: $settingsManager.hoverPreviewMode) {
                 ForEach(SettingsManager.HoverPreviewMode.allCases, id: \.self) { mode in
                     Text(mode.displayName).tag(mode)
                 }
@@ -154,15 +154,15 @@ struct SettingsView: View {
 
             Divider()
 
-            // サイズ設定
+            // Configuration de la taille
             VStack(alignment: .leading, spacing: 12) {
-                Text("サイズ")
+                Text("Taille")
                     .font(.subheadline)
                     .fontWeight(.semibold)
 
-                // 幅
+                // Largeur
                 HStack {
-                    Text("幅:")
+                    Text("Largeur:")
                         .frame(width: 60, alignment: .leading)
                     Slider(
                         value: $settingsManager.hoverPreviewWidth,
@@ -174,9 +174,9 @@ struct SettingsView: View {
                         .foregroundColor(.secondary)
                 }
 
-                // 高さ
+                // Hauteur
                 HStack {
-                    Text("高さ:")
+                    Text("Hauteur:")
                         .frame(width: 60, alignment: .leading)
                     Slider(
                         value: $settingsManager.hoverPreviewHeight,
@@ -188,9 +188,9 @@ struct SettingsView: View {
                         .foregroundColor(.secondary)
                 }
 
-                // 文字サイズ
+                // Taille de police
                 HStack {
-                    Text("文字:")
+                    Text("Texte:")
                         .frame(width: 60, alignment: .leading)
                     Slider(
                         value: $settingsManager.hoverPreviewFontSize,
@@ -205,18 +205,18 @@ struct SettingsView: View {
         }
     }
 
-    // MARK: - Dropdown
+    // MARK: - Menu déroulant
 
     private var dropdownSection: some View {
-        Section("ドロップダウンメニュー") {
+        Section("Menu déroulant") {
             VStack(alignment: .leading, spacing: 12) {
-                Text("サイズ")
+                Text("Taille")
                     .font(.subheadline)
                     .fontWeight(.semibold)
 
-                // 幅
+                // Largeur
                 HStack {
-                    Text("幅:")
+                    Text("Largeur:")
                         .frame(width: 60, alignment: .leading)
                     Slider(
                         value: $settingsManager.dropdownWidth,
@@ -228,9 +228,9 @@ struct SettingsView: View {
                         .foregroundColor(.secondary)
                 }
 
-                // 高さ
+                // Hauteur
                 HStack {
-                    Text("高さ:")
+                    Text("Hauteur:")
                         .frame(width: 60, alignment: .leading)
                     Slider(
                         value: $settingsManager.dropdownHeight,
@@ -242,9 +242,9 @@ struct SettingsView: View {
                         .foregroundColor(.secondary)
                 }
 
-                // 文字サイズ
+                // Taille de police
                 HStack {
-                    Text("文字:")
+                    Text("Texte:")
                         .frame(width: 60, alignment: .leading)
                     Slider(
                         value: $settingsManager.dropdownFontSize,
@@ -259,54 +259,54 @@ struct SettingsView: View {
         }
     }
 
-    // MARK: - Popup
+    // MARK: - Popup personnalisé
 
     @ViewBuilder
     private var popupSection: some View {
-        Section("カスタムポップアップ") {
-            Toggle("ポップアップ通知を表示", isOn: $settingsManager.popupEnabled)
+        Section("Popup personnalisé") {
+            Toggle("Afficher les notifications popup", isOn: $settingsManager.popupEnabled)
 
             if settingsManager.popupEnabled {
-                // 表示時間
+                // Durée d'affichage
                 HStack {
-                    Text("表示時間:")
+                    Text("Durée:")
                     Stepper(
                         value: $settingsManager.popupDuration,
                         in: 0...30,
                         step: 1
                     ) {
-                        Text(settingsManager.popupDuration == 0 ? "消えない" : "\(settingsManager.popupDuration)秒")
+                        Text(settingsManager.popupDuration == 0 ? "Ne disparaît pas" : "\(settingsManager.popupDuration) sec")
                             .frame(width: 60)
                     }
                 }
 
-                // 透過率
+                // Opacité
                 HStack {
-                    Text("透過率:")
+                    Text("Opacité:")
                     Slider(value: $settingsManager.popupOpacity, in: 0.3...1.0, step: 0.05)
                     Text("\(Int(settingsManager.popupOpacity * 100))%")
                         .frame(width: 40)
                 }
 
-                // 文字サイズ
+                // Taille de police
                 HStack {
-                    Text("文字サイズ:")
+                    Text("Taille du texte:")
                     Slider(value: $settingsManager.popupFontSize, in: 10...30, step: 1)
                     Text("\(Int(settingsManager.popupFontSize))pt")
                         .frame(width: 40)
                 }
 
-                // サイズ（4K対応）
+                // Taille (compatible 4K)
                 VStack(alignment: .leading, spacing: 4) {
                     HStack {
-                        Text("幅:")
+                        Text("Largeur:")
                             .frame(width: 40, alignment: .leading)
                         Slider(value: $settingsManager.popupWidth, in: 200...1200, step: 10)
                         Text("\(Int(settingsManager.popupWidth))")
                             .frame(width: 50)
                     }
                     HStack {
-                        Text("高さ:")
+                        Text("Hauteur:")
                             .frame(width: 40, alignment: .leading)
                         Slider(value: $settingsManager.popupHeight, in: 60...400, step: 10)
                         Text("\(Int(settingsManager.popupHeight))")
@@ -314,7 +314,7 @@ struct SettingsView: View {
                     }
                 }
 
-                // 位置
+                // Position
                 VStack(alignment: .leading, spacing: 4) {
                     HStack {
                         Text("X:")
@@ -332,13 +332,13 @@ struct SettingsView: View {
                     }
                 }
 
-                // テスト・プレビューボタン
+                // Boutons Test/Prévisualisation
                 HStack {
-                    Button("プレビュー表示") {
+                    Button("Afficher l'aperçu") {
                         NotificationPopupController.shared.showPreview()
                     }
 
-                    Button("テスト通知") {
+                    Button("Notification de test") {
                         sendTestNotification()
                     }
                 }
@@ -346,11 +346,11 @@ struct SettingsView: View {
         }
     }
 
-    // MARK: - Retention
+    // MARK: - Durée de conservation
 
     private var retentionSection: some View {
-        Section("保存期間") {
-            Picker("保存期間", selection: $settingsManager.retentionPeriod) {
+        Section("Durée de conservation") {
+            Picker("Durée de conservation", selection: $settingsManager.retentionPeriod) {
                 ForEach(SettingsManager.RetentionPeriod.allCases, id: \.self) { period in
                     Text(period.displayName).tag(period)
                 }
@@ -359,16 +359,16 @@ struct SettingsView: View {
         }
     }
 
-    // MARK: - Excluded Apps
+    // MARK: - Applications exclues
 
     private var excludedAppsSection: some View {
-        Section("除外アプリ") {
-            Text("通知を保存しないアプリ:")
+        Section("Applications exclues") {
+            Text("Applications dont les notifications ne sont pas sauvegardées:")
                 .font(.caption)
                 .foregroundColor(.secondary)
 
             if settingsManager.excludedApps.isEmpty {
-                Text("なし")
+                Text("Aucune")
                     .foregroundColor(.secondary)
                     .italic()
             } else {
@@ -390,50 +390,50 @@ struct SettingsView: View {
             }
 
             Button(action: { showingAddAppSheet = true }) {
-                Label("アプリを追加", systemImage: "plus")
+                Label("Ajouter une application", systemImage: "plus")
             }
         }
     }
 
-    // MARK: - Data
+    // MARK: - Données
 
     private var dataSection: some View {
-        Section("データ") {
+        Section("Données") {
             HStack {
-                Text("保存件数:")
+                Text("Notifications sauvegardées:")
                 Spacer()
-                Text("\(storageManager.storageInfo.count) 件")
+                Text("\(storageManager.storageInfo.count) notif.")
                     .foregroundColor(.secondary)
             }
 
             HStack {
-                Text("ストレージ:")
+                Text("Stockage:")
                 Spacer()
                 Text(storageManager.storageInfo.sizeString)
                     .foregroundColor(.secondary)
             }
 
             HStack {
-                Button("履歴をクリア") {
+                Button("Effacer l'historique") {
                     showingClearConfirmation = true
                 }
 
                 Spacer()
 
-                Menu("エクスポート") {
-                    Button("JSON形式") { exportJSON() }
-                    Button("CSV形式") { exportCSV() }
+                Menu("Exporter") {
+                    Button("JSON") { exportJSON() }
+                    Button("CSV") { exportCSV() }
                 }
             }
 
             Divider()
 
-            // 負荷テストボタン
+            // Bouton de test de charge
             HStack {
-                Button("負荷テスト (1000件)") {
+                Button("Test de charge (1000)") {
                     showingLoadTestConfirmation = true
                 }
-                .help("テスト通知を1000件生成します")
+                .help("Génère 1000 notifications de test")
 
                 Spacer()
 
@@ -450,7 +450,7 @@ struct SettingsView: View {
     private var aboutSection: some View {
         Section("About") {
             VStack(spacing: 12) {
-                // アプリ名とバージョン
+                // Nom de l'app et version
                 VStack(spacing: 4) {
                     Text("Notipon")
                         .font(.title2)
@@ -465,18 +465,18 @@ struct SettingsView: View {
 
                 Divider()
 
-                // GitHubリンク
+                // Lien GitHub
                 Button(action: {
                     NSWorkspace.shared.open(AppConstants.githubURL)
                 }) {
                     HStack {
                         Image(systemName: "arrow.up.forward.square")
-                        Text("GitHub リポジトリ")
+                        Text("Dépôt GitHub")
                     }
                     .frame(maxWidth: .infinity)
                 }
 
-                // Buy Me a Coffeeボタン
+                // Buy Me a Coffee
                 Button(action: {
                     NSWorkspace.shared.open(AppConstants.buyMeCoffeeURL)
                 }) {
@@ -490,9 +490,9 @@ struct SettingsView: View {
 
                 Divider()
 
-                // ライセンス情報
+                // Informations de licence
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("ライセンス")
+                    Text("Licence")
                         .font(.caption)
                         .fontWeight(.semibold)
 
@@ -511,7 +511,7 @@ struct SettingsView: View {
         isLoadTestRunning = true
         loadTestError = nil
 
-        // バックグラウンドで実行
+        // Exécution en arrière-plan
         DispatchQueue.global(qos: .userInitiated).async {
             do {
                 try storageManager.generateTestNotifications(count: 1000)
@@ -538,7 +538,7 @@ struct SettingsView: View {
                 try SMAppService.mainApp.unregister()
             }
         } catch {
-            print("Login item error: \(error)")
+            print("Erreur de l'élément de connexion : \(error)")
         }
     }
 
@@ -579,15 +579,15 @@ struct SettingsView: View {
         let testNotification = NotificationItem(
             appIdentifier: "com.mugendesk.Notipon",
             appName: "Notipon",
-            title: "テスト通知",
-            body: "これはテスト通知です。位置やサイズを確認してください。",
+            title: "Notification de test",
+            body: "Ceci est une notification de test. Vérifiez la position et la taille.",
             timestamp: Date()
         )
         NotificationPopupController.shared.show(testNotification)
     }
 }
 
-// MARK: - Add Excluded App View
+// MARK: - Vue d'ajout d'application exclue
 
 struct AddExcludedAppView: View {
     @ObservedObject var settingsManager: SettingsManager
@@ -597,7 +597,7 @@ struct AddExcludedAppView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            Text("除外するアプリを選択")
+            Text("Sélectionner une application à exclure")
                 .font(.headline)
                 .padding()
 
@@ -625,7 +625,7 @@ struct AddExcludedAppView: View {
 
             HStack {
                 Spacer()
-                Button("キャンセル") {
+                Button("Annuler") {
                     dismiss()
                 }
             }

@@ -1,7 +1,7 @@
 import SwiftUI
 import AppKit
 
-/// キーボードショートカットレコーダー
+/// Enregistreur de raccourci clavier
 struct KeyRecorderView: View {
     @Binding var shortcut: KeyboardShortcut
     @State private var isRecording = false
@@ -11,7 +11,7 @@ struct KeyRecorderView: View {
             Button(action: { isRecording = true }) {
                 HStack {
                     if shortcut.isDisabled {
-                        Text("ショートカットを設定...")
+                        Text("Définir un raccourci...")
                             .foregroundColor(.secondary)
                     } else {
                         Text(shortcut.displayString)
@@ -45,14 +45,14 @@ struct KeyRecorderView: View {
     }
 
     private func handleKeyPress(_ event: NSEvent) {
-        // 修飾キーのみの入力は無視
+        // Ignorer les entrées avec uniquement des touches de modification
         guard let characters = event.charactersIgnoringModifiers, !characters.isEmpty else { return }
 
         let modifiers = event.modifierFlags.intersection([.command, .shift, .option, .control])
         let keyCode = event.keyCode
         let key = characters.uppercased()
 
-        // 少なくとも1つの修飾キーが必要
+        // Au moins une touche de modification est requise
         guard !modifiers.isEmpty else { return }
 
         var shortcutModifiers: KeyboardShortcut.Modifiers = []
@@ -71,9 +71,9 @@ struct KeyRecorderView: View {
     }
 }
 
-// MARK: - Key Event Capturing View
+// MARK: - Vue de capture des événements clavier
 
-/// NSViewを使ってキーイベントをキャプチャする
+/// Capture les événements clavier via NSView
 private struct KeyEventCapturingView: NSViewRepresentable {
     @Binding var isRecording: Bool
     let onKeyPress: (NSEvent) -> Void

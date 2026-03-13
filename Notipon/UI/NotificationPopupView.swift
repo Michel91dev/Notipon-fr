@@ -1,7 +1,7 @@
 import SwiftUI
 import AppKit
 
-/// カスタム通知ポップアップのUI
+/// Interface utilisateur du popup de notification personnalisé
 struct NotificationPopupView: View {
     let notification: NotificationItem
     let onDismiss: () -> Void
@@ -12,11 +12,11 @@ struct NotificationPopupView: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            // アプリアイコン
+            // Icône de l'application / Image
             appIcon
                 .frame(width: 40, height: 40)
 
-            // 通知内容
+            // Contenu de la notification
             VStack(alignment: .leading, spacing: 4) {
                 HStack {
                     Text(notification.appName)
@@ -49,7 +49,7 @@ struct NotificationPopupView: View {
                 }
             }
 
-            // 閉じるボタン（ホバー時のみ表示）
+            // Bouton fermer (affiché uniquement au survol)
             if isHovering {
                 Button(action: onDismiss) {
                     Image(systemName: "xmark.circle.fill")
@@ -85,7 +85,7 @@ struct NotificationPopupView: View {
 
     @ViewBuilder
     private var appIcon: some View {
-        // 通知に画像データがあればそれを表示（ジャケット画像など）
+        // Afficher l'image des données si disponible (pochette d'album, etc.)
         if let imageData = notification.imageData,
            let nsImage = NSImage(data: imageData) {
             Image(nsImage: nsImage)

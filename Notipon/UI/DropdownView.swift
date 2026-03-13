@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// ドロップダウンメニュー（クリック時）
+/// Menu déroulant (au clic)
 struct DropdownView: View {
     @EnvironmentObject var storageManager: StorageManager
     @EnvironmentObject var settingsManager: SettingsManager
@@ -14,12 +14,12 @@ struct DropdownView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // ヘッダー
+            // En-tête
             headerSection
 
             Divider()
 
-            // 通知一覧
+            // Liste des notifications
             ScrollView {
                 LazyVStack(spacing: 0) {
                     ForEach(recentNotifications) { notification in
@@ -29,17 +29,17 @@ struct DropdownView: View {
                             }
                             .contextMenu {
                                 Button(action: { openApp(notification) }) {
-                                    Label("アプリを開く", systemImage: "arrow.up.forward.app")
+                                    Label("Ouvrir l'application", systemImage: "arrow.up.forward.app")
                                 }
 
                                 Button(action: { try? storageManager.markAsRead(notification.id) }) {
-                                    Label("既読にする", systemImage: "checkmark.circle")
+                                    Label("Marquer comme lu", systemImage: "checkmark.circle")
                                 }
 
                                 Divider()
 
                                 Button(role: .destructive, action: { try? storageManager.delete(notification.id) }) {
-                                    Label("削除", systemImage: "trash")
+                                    Label("Supprimer", systemImage: "trash")
                                 }
                             }
 
@@ -54,7 +54,7 @@ struct DropdownView: View {
 
             Divider()
 
-            // フッター
+            // Pied de page
             footerSection
         }
         .frame(width: settingsManager.dropdownWidth)
@@ -70,9 +70,9 @@ struct DropdownView: View {
 
             Spacer()
 
-            // 未読数
+            // Non lus
             if storageManager.unreadCount > 0 {
-                Text("\(storageManager.unreadCount) 件未読")
+                Text("\(storageManager.unreadCount) non lus")
                     .font(.system(size: settingsManager.dropdownFontSize * 0.9))
                     .foregroundColor(.secondary)
             }
@@ -93,7 +93,7 @@ struct DropdownView: View {
     private var footerSection: some View {
         HStack {
             Button(action: markAllAsRead) {
-                Label("すべて既読", systemImage: "checkmark.circle")
+                Label("Tout marquer comme lu", systemImage: "checkmark.circle")
                     .font(.system(size: settingsManager.dropdownFontSize * 0.9))
             }
             .buttonStyle(.plain)
@@ -102,7 +102,7 @@ struct DropdownView: View {
             Spacer()
 
             Button(action: onOpenHistory) {
-                Text("すべての履歴を見る →")
+                Text("Voir tout l'historique →")
                     .font(.system(size: settingsManager.dropdownFontSize * 0.9))
             }
             .buttonStyle(.plain)
@@ -111,7 +111,7 @@ struct DropdownView: View {
             Spacer()
 
             Button(action: quitApp) {
-                Label("終了", systemImage: "power")
+                Label("Quitter", systemImage: "power")
                     .font(.system(size: settingsManager.dropdownFontSize * 0.9))
             }
             .buttonStyle(.plain)
@@ -124,12 +124,12 @@ struct DropdownView: View {
     // MARK: - Actions
 
     private func handleNotificationTap(_ notification: NotificationItem) {
-        // 既読にする
+        // Marquer comme lu
         try? storageManager.markAsRead(notification.id)
     }
 
     private func openApp(_ notification: NotificationItem) {
-        // アプリを開く
+        // Ouvrir l'application
         if let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: notification.appIdentifier) {
             NSWorkspace.shared.open(url)
         }

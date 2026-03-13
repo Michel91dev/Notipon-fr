@@ -489,20 +489,20 @@ final class NotificationMonitor: ObservableObject {
 
         // 方法1: bplist形式（NSKeyedArchiver）
         if data.prefix(6).elementsEqual("bplist".utf8) {
-            do {
-                // NSKeyedUnarchiverで複数のクラスを許可
-                let allowedClasses: [AnyClass] = [
-                    NSDictionary.self, NSArray.self, NSString.self,
-                    NSNumber.self, NSData.self, NSDate.self,
-                    NSURL.self, NSNull.self
-                ]
+            // Classes autorisées pour NSKeyedUnarchiver
+            let allowedClasses: [AnyClass] = [
+                NSDictionary.self, NSArray.self, NSString.self,
+                NSNumber.self, NSData.self, NSDate.self,
+                NSURL.self, NSNull.self
+            ]
 
+            do {
                 if let unarchived = try NSKeyedUnarchiver.unarchivedObject(ofClasses: allowedClasses, from: data) {
                     return extractFromObject(unarchived)
                 }
             } catch {
-                // フォールバック: 古い方式
-                if let unarchived = try? NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(data) {
+                // Fallback: ancienne méthode (deprecated mais gardée pour compatibilité)
+                if let unarchived = try? NSKeyedUnarchiver.unarchivedObject(ofClasses: allowedClasses, from: data) {
                     return extractFromObject(unarchived)
                 }
             }

@@ -2,7 +2,7 @@ import SwiftUI
 import AppKit
 import Combine
 
-/// カスタム通知ポップアップを管理
+/// Gestionnaire des popups de notification personnalisés
 final class NotificationPopupController: ObservableObject {
     static let shared = NotificationPopupController()
 
@@ -11,34 +11,34 @@ final class NotificationPopupController: ObservableObject {
     private var dismissTimer: Timer?
     private var cancellables = Set<AnyCancellable>()
     private var settingsManager: SettingsManager { SettingsManager.shared }
-    private var isUpdatingFromSettings = false  // 無限ループ防止フラグ
+    private var isUpdatingFromSettings = false  // Drapeau de prévention des boucles infinies
 
-    /// 現在表示中の通知
+    /// Notification actuellement affichée
     @Published var currentNotification: NotificationItem?
 
-    /// 通知キュー（複数通知が同時に来た場合）
+    /// File d'attente des notifications (pour les cas où plusieurs arrivent simultanément)
     private var notificationQueue: [NotificationItem] = []
 
     private init() {
         observeSettings()
-        // ウィンドウを事前作成（初回表示を高速化）
+        // Précréer la fenêtre (accélère l'affichage initial)
         DispatchQueue.main.async { [weak self] in
             self?.preloadWindow()
         }
     }
 
-    /// ウィンドウを事前作成してレンダリングを完了させる
+    /// Précréer la fenêtre et terminer le rendu
     private func preloadWindow() {
         createWindow()
-        // 一瞬表示してSwiftUIをレンダリング
+        // Afficher brièvement pour rendre SwiftUI
         popupWindow?.orderFront(nil)
         popupWindow?.orderOut(nil)
     }
 
-    // MARK: - Settings Observer
+    // MARK: - Observateur des paramètres
 
     private func observeSettings() {
-        // 各設定を個別に監視（CombineLatest4だと順序問題が起きる可能性）
+        // Observer chaque paramètre individuellement (CombineLatest4 peut avoir des problèmes d'ordre)
         settingsManager.$popupX
             .dropFirst()
             .receive(on: DispatchQueue.main)
@@ -81,13 +81,13 @@ final class NotificationPopupController: ObservableObject {
         updateWindowFrame(frame)
     }
 
-    // MARK: - Show Notification
+    // MARK: - Afficher la notification
 
-    /// 通知をポップアップ表示
+    /// Afficher une notification en popup
     func show(_ notification: NotificationItem) {
         guard settingsManager.popupEnabled else { return }
 
-        // 既にポップアップが表示中なら、キューに追加
+        // Si un popup est déjà affiché, ajouter à la file d'attente
         if self.currentNotification != nil {
             self.notificationQueue.append(notification)
             return
@@ -98,23 +98,23 @@ final class NotificationPopupController: ObservableObject {
         self.startDismissTimer()
     }
 
-    /// 複数の通知を一度に表示（最新のみ表示）
+    /// Afficher plusieurs notifications à la fois (seule la plus récente est affichée)
     func showMultiple(_ notifications: [NotificationItem]) {
         guard !notifications.isEmpty else { return }
 
-        // 最新の通知のみ表示
+        // Afficher uniquement la notification la plus récente
         if let latest = notifications.first {
             show(latest)
         }
     }
 
-    // MARK: - Window Management
+    // MARK: - Gestion de la fenêtre
 
     private func showPopupWindow() {
         if popupWindow == nil {
             createWindow()
         }
-        // contentはObservableObjectで自動更新
+            // Le contenu se met à jour automatiquement via ObservableObject
         popupWindow?.alphaValue = settingsManager.popupOpacity
         popupWindow?.orderFront(nil)
     }
@@ -135,16 +135,16 @@ final class NotificationPopupController: ObservableObject {
         window.collectionBehavior = [.canJoinAllSpaces, .stationary]
         window.isMovableByWindowBackground = true
         window.hasShadow = true
-        window.alphaValue = 0  // 初期は非表示
+        window.alphaValue = 0  // Initialement caché
 
-        // SwiftUI View を事前作成（ObservableObjectで更新）
+        // Précréer la vue SwiftUI (mise à jour via ObservableObject)
         let contentView = PopupContentView(controller: self)
             .environmentObject(settingsManager)
         let hosting = NSHostingView(rootView: AnyView(contentView))
         window.contentView = hosting
         hostingView = hosting
 
-        // ドラッグで位置変更時に設定を保存
+        // Sauvegarder la position lors du déplacement
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(windowDidMove),
@@ -156,7 +156,7 @@ final class NotificationPopupController: ObservableObject {
     }
 
     @objc private func windowDidMove(_ notification: Notification) {
-        // 設定からの更新中は保存をスキップ（無限ループ防止）
+        // Éviter de sauvegarder pendant la mise à jour des paramètres (prévient les boucles infinies)
         guard !isUpdatingFromSettings else { return }
         guard let window = notification.object as? NSWindow else { return }
         settingsManager.setPopupFrame(window.frame)
@@ -165,19 +165,19 @@ final class NotificationPopupController: ObservableObject {
     private func updateWindowFrame(_ frame: NSRect) {
         isUpdatingFromSettings = true
         popupWindow?.setFrame(frame, display: true, animate: false)
-        // 少し遅延してフラグをリセット
+        // Réinitialiser le drapeau après un court délai
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
             self?.isUpdatingFromSettings = false
         }
     }
 
-    // MARK: - Dismiss
+    // MARK: - Fermeture
 
     private func startDismissTimer() {
         dismissTimer?.invalidate()
 
         let duration = settingsManager.popupDuration
-        guard duration > 0 else { return }  // 0秒なら自動消去しない
+        guard duration > 0 else { return }  // 0 secondes = ne disparaît pas automatiquement
 
         dismissTimer = Timer.scheduledTimer(withTimeInterval: TimeInterval(duration), repeats: false) { [weak self] _ in
             self?.dismiss()
@@ -188,7 +188,7 @@ final class NotificationPopupController: ObservableObject {
         dismissTimer?.invalidate()
         dismissTimer = nil
 
-        // フェードアウトアニメーション
+        // Animation de fondu
         NSAnimationContext.runAnimationGroup({ context in
             context.duration = 0.2
             popupWindow?.animator().alphaValue = 0
@@ -196,7 +196,7 @@ final class NotificationPopupController: ObservableObject {
             self?.popupWindow?.orderOut(nil)
             self?.currentNotification = nil
 
-            // キューに次の通知があれば表示
+            // Afficher la suivante dans la file si disponible
             if let next = self?.notificationQueue.first {
                 self?.notificationQueue.removeFirst()
                 self?.show(next)
@@ -204,7 +204,7 @@ final class NotificationPopupController: ObservableObject {
         })
     }
 
-    /// 手動で即座に閉じる
+    /// Fermer manuellement immédiatement
     func dismissImmediately() {
         dismissTimer?.invalidate()
         dismissTimer = nil
@@ -216,25 +216,26 @@ final class NotificationPopupController: ObservableObject {
     // MARK: - Action
 
     private func handleAction() {
-        // 通知クリック時のアクション（将来拡張用）
+        // Action au clic sur la notification (pour extension future)
         dismiss()
     }
 
-    // MARK: - Preview Mode (設定画面用)
+    // MARK: - Mode Aperçu (pour vérifier la position dans les paramètres)
 
-    /// プレビュー表示（設定画面から位置を確認）
+    /// Afficher l'aperçu (depuis les paramètres pour vérifier la position)
     func showPreview() {
         let sampleNotification = NotificationItem(
             appIdentifier: "com.example.preview",
-            appName: "プレビュー",
-            title: "通知タイトル",
-            body: "これはプレビュー通知です。ドラッグで位置を変更できます。"
+            appName: "Aperçu",
+            title: "Titre de notification",
+            body: "Ceci est une notification d'aperçu. Vous pouvez déplacer la fenêtre en la traînant.",
+            timestamp: Date()
         )
 
         currentNotification = sampleNotification
         showPopupWindow()
 
-        // プレビューは5秒で自動消去
+        // L'aperçu disparaît automatiquement après 5 secondes
         dismissTimer?.invalidate()
         dismissTimer = Timer.scheduledTimer(withTimeInterval: 5, repeats: false) { [weak self] _ in
             self?.dismiss()
@@ -242,7 +243,7 @@ final class NotificationPopupController: ObservableObject {
     }
 }
 
-// MARK: - PopupContentView (ObservableObject対応)
+// MARK: - PopupContentView (compatible ObservableObject)
 
 private struct PopupContentView: View {
     @ObservedObject var controller: NotificationPopupController

@@ -1,7 +1,7 @@
 import SwiftUI
 import AppKit
 
-/// アプリアイコンキャッシュ
+/// Cache des icônes d'application
 class AppIconCache {
     static let shared = AppIconCache()
     private var cache: [String: NSImage] = [:]
@@ -24,7 +24,7 @@ class AppIconCache {
     }
 }
 
-/// アプリアイコン表示
+/// Affichage de l'icône d'application
 struct AppIconView: View {
     let bundleIdentifier: String
     let size: CGFloat
@@ -61,7 +61,7 @@ struct AppIconView: View {
     }
 }
 
-/// 通知行コンポーネント
+/// Composant de ligne de notification
 struct NotificationRow: View {
     let notification: NotificationItem
     var compact: Bool = false
@@ -77,16 +77,16 @@ struct NotificationRow: View {
 
     var body: some View {
         HStack(alignment: .top, spacing: 10) {
-            // 未読インジケーター
+            // Indicateur de non-lu
             Circle()
                 .fill(notification.isRead ? Color.clear : Color.accentColor)
                 .frame(width: 8, height: 8)
                 .padding(.top, 6)
 
-            // アプリアイコン
+            // Icône de l'application
             AppIconView(bundleIdentifier: notification.appIdentifier, size: iconSize)
 
-            // コンテンツ
+            // Contenu
             VStack(alignment: .leading, spacing: 2) {
                 HStack {
                     Text(notification.appName)
@@ -121,12 +121,12 @@ struct NotificationRow: View {
 // MARK: - Notification Row Styles
 
 extension NotificationRow {
-    /// コンパクトスタイル（ドロップダウン用）
+    /// Style compact (pour le menu déroulant)
     static func compact(_ notification: NotificationItem) -> NotificationRow {
         NotificationRow(notification: notification, compact: true)
     }
 
-    /// フルスタイル（履歴ウィンドウ用）
+    /// Style complet (pour la fenêtre d'historique)
     static func full(_ notification: NotificationItem) -> NotificationRow {
         NotificationRow(notification: notification, compact: false)
     }

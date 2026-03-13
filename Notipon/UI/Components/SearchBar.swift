@@ -1,9 +1,9 @@
 import SwiftUI
 
-/// 検索バー
+/// Barre de recherche
 struct SearchBar: View {
     @Binding var text: String
-    var placeholder: String = "検索..."
+    var placeholder: String = "Rechercher..."
     var onSubmit: (() -> Void)?
     var focused: FocusState<Bool>.Binding?
 
@@ -67,13 +67,13 @@ struct SearchBar: View {
 // MARK: - Search Bar Styles
 
 extension SearchBar {
-    /// コンパクトスタイル
+    /// Style compact
     func compact() -> some View {
         self
             .frame(height: 28)
     }
 
-    /// ラージスタイル
+    /// Style large
     func large() -> some View {
         self
             .frame(height: 36)
@@ -83,8 +83,8 @@ extension SearchBar {
 #Preview {
     VStack(spacing: 16) {
         SearchBar(text: .constant(""))
-        SearchBar(text: .constant("検索テキスト"))
-        SearchBar(text: .constant(""), placeholder: "通知を検索...")
+        SearchBar(text: .constant("Texte de recherche"))
+        SearchBar(text: .constant(""), placeholder: "Rechercher des notifications...")
             .compact()
     }
     .padding()

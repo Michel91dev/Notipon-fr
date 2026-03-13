@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// アプリフィルタチップ
+/// Puce de filtre par application
 struct AppFilterChip: View {
     let name: String
     let isSelected: Bool
@@ -32,14 +32,14 @@ struct AppFilterChipGroup: View {
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
-                // すべて
+                // Tout
                 AppFilterChip(
-                    name: "すべて",
+                    name: "Tout",
                     isSelected: selectedApps.isEmpty,
                     action: { selectedApps.removeAll() }
                 )
 
-                // アプリ別
+                // Par application
                 ForEach(apps, id: \.identifier) { app in
                     AppFilterChip(
                         name: app.name,

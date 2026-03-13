@@ -2,7 +2,7 @@ import SwiftUI
 import AppKit
 import Combine
 
-/// メニューバーコントローラー（ホバー対応）
+/// Contrôleur de la barre de menus (avec support survol)
 final class MenuBarController: NSObject, ObservableObject {
     private var statusItem: NSStatusItem!
     private var hoverPopover: NSPopover!
@@ -34,12 +34,12 @@ final class MenuBarController: NSObject, ObservableObject {
 
         updateIcon()
 
-        // アクション設定
+        // Configuration de l'icône
         button.target = self
         button.action = #selector(statusItemClicked)
         button.sendAction(on: [.leftMouseUp, .rightMouseUp])
 
-        // ホバー検知用のハンドラーを設定
+        // Configuration du gestionnaire de survol
         hoverHandler = HoverHandler(
             onMouseEntered: { [weak self] in self?.handleMouseEntered() },
             onMouseExited: { [weak self] in self?.handleMouseExited() }
@@ -57,7 +57,7 @@ final class MenuBarController: NSObject, ObservableObject {
     @objc private func statusItemClicked() {
         guard let event = NSApp.currentEvent else { return }
 
-        // ホバープレビューを閉じる
+        // Fermer l'aperçu au survol
         hideHoverPreview()
 
         if event.type == .rightMouseUp {
@@ -68,7 +68,7 @@ final class MenuBarController: NSObject, ObservableObject {
     }
 
     private func setupPopovers() {
-        // ホバープレビュー用ポップオーバー
+        // Aperçu au survol
         hoverPopover = NSPopover()
         hoverPopover.contentSize = NSSize(
             width: settingsManager.hoverPreviewWidth,
@@ -82,7 +82,7 @@ final class MenuBarController: NSObject, ObservableObject {
                 .environmentObject(settingsManager)
         )
 
-        // ドロップダウン用ポップオーバー
+        // Menu déroulant
         dropdownPopover = NSPopover()
         dropdownPopover.contentSize = NSSize(
             width: settingsManager.dropdownWidth,
@@ -100,7 +100,7 @@ final class MenuBarController: NSObject, ObservableObject {
         )
     }
 
-    // MARK: - Icon Update
+    // MARK: - Mise à jour de l'icône
 
     private func updateIcon() {
         guard let button = statusItem.button else { return }
@@ -108,14 +108,14 @@ final class MenuBarController: NSObject, ObservableObject {
         let unreadCount = storageManager.unreadCount
         let showBadge = settingsManager.showUnreadBadge && unreadCount > 0
 
-        // ベースアイコン（白色で固定）
+        // Icône de base (blanche fixe)
         let config = NSImage.SymbolConfiguration(pointSize: 16, weight: .medium)
         guard let symbolImage = NSImage(systemSymbolName: "bell.fill", accessibilityDescription: "Notipon")?.withSymbolConfiguration(config) else { return }
 
         let whiteIcon = createWhiteIcon(from: symbolImage)
 
         if showBadge {
-            // バッジ付きアイコン
+            // Icône avec badge
             let badgeImage = createBadgeImage(base: whiteIcon, count: unreadCount)
             button.image = badgeImage
         } else {
@@ -129,11 +129,11 @@ final class MenuBarController: NSObject, ObservableObject {
 
         image.lockFocus()
 
-        // 白い矩形を描画
+        // Dessiner un rectangle blanc
         NSColor.white.setFill()
         NSRect(origin: .zero, size: size).fill()
 
-        // シンボルでマスキング（destinationInで白い部分だけシンボルの形に切り抜く）
+        // Dessiner le symbole en masquant la partie blanche
         symbol.draw(in: NSRect(origin: .zero, size: size), from: .zero, operation: .destinationIn, fraction: 1.0)
 
         image.unlockFocus()
@@ -147,7 +147,7 @@ final class MenuBarController: NSObject, ObservableObject {
 
         image.lockFocus()
 
-        // 白いベルアイコンを描画
+        // Dessiner l'icône blanche
         base.draw(
             in: NSRect(x: 0, y: 0, width: 18, height: 18),
             from: .zero,
@@ -155,12 +155,12 @@ final class MenuBarController: NSObject, ObservableObject {
             fraction: 1.0
         )
 
-        // バッジ（赤い丸）
+        // Dessiner le badge (cercle rouge)
         let badgeRect = NSRect(x: 12, y: 10, width: 10, height: 10)
         NSColor.systemRed.setFill()
         NSBezierPath(ovalIn: badgeRect).fill()
 
-        // バッジ数字（9以下のみ）
+        // Dessiner le numéro du badge (jusqu'à 9)
         if count <= 9 {
             let text = "\(count)"
             let attributes: [NSAttributedString.Key: Any] = [
@@ -197,7 +197,7 @@ final class MenuBarController: NSObject, ObservableObject {
             }
             .store(in: &cancellables)
 
-        // ホバープレビューのサイズ変更を監視
+        // Surveillance des changements de taille de l'aperçu au survol
         settingsManager.$hoverPreviewWidth
             .receive(on: DispatchQueue.main)
             .sink { [weak self] width in
@@ -212,7 +212,7 @@ final class MenuBarController: NSObject, ObservableObject {
             }
             .store(in: &cancellables)
 
-        // ドロップダウンのサイズ変更を監視
+        // Surveillance des changements de taille du menu déroulant
         settingsManager.$dropdownWidth
             .receive(on: DispatchQueue.main)
             .sink { [weak self] width in
@@ -228,10 +228,10 @@ final class MenuBarController: NSObject, ObservableObject {
             .store(in: &cancellables)
     }
 
-    // MARK: - Mouse Events
+    // MARK: - Événements souris
 
     private func handleMouseEntered() {
-        // 少し遅延してホバープレビューを表示
+        // Affichage différé de l'aperçu au survol
         hoverTimer?.invalidate()
         hoverTimer = Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { [weak self] _ in
             self?.showHoverPreview()
@@ -242,13 +242,13 @@ final class MenuBarController: NSObject, ObservableObject {
         hoverTimer?.invalidate()
         hoverTimer = nil
 
-        // ドロップダウンが表示されていなければプレビューを閉じる
+        // Fermer le popup si le menu déroulant n'est pas affiché
         if !dropdownPopover.isShown {
             hideHoverPreview()
         }
     }
 
-    // MARK: - Popover Control
+    // MARK: - Contrôle des popups
 
     private func showHoverPreview() {
         guard let button = statusItem.button,
@@ -277,25 +277,25 @@ final class MenuBarController: NSObject, ObservableObject {
         }
     }
 
-    // MARK: - History Window
+    // MARK: - Fenêtre d'historique
 
     func openHistoryWindow() {
         dropdownPopover.performClose(nil)
 
-        // 既存のウィンドウがあり、表示されている場合はトグル（閉じる）
+        // Si une fenêtre existe et est visible, la fermer
         if let window = historyWindow, window.isVisible {
             window.close()
             return
         }
 
-        // ウィンドウが存在するが非表示の場合は表示
+        // Si la fenêtre existe mais est cachée, l'afficher
         if let window = historyWindow {
             window.makeKeyAndOrderFront(nil)
             NSApp.activate(ignoringOtherApps: true)
             return
         }
 
-        // ウィンドウが存在しない場合は新規作成
+        // Créer une nouvelle fenêtre si elle n'existe pas
         let contentView = HistoryWindowView()
             .environmentObject(storageManager)
             .environmentObject(settingsManager)
@@ -318,12 +318,12 @@ final class MenuBarController: NSObject, ObservableObject {
         NSApp.activate(ignoringOtherApps: true)
     }
 
-    // MARK: - Settings
+    // MARK: - Paramètres
 
     func openSettings() {
         dropdownPopover.performClose(nil)
 
-        // Settings window
+        // Paramètres window
         let contentView = SettingsView()
             .environmentObject(settingsManager)
             .environmentObject(storageManager)
@@ -335,7 +335,7 @@ final class MenuBarController: NSObject, ObservableObject {
             defer: false
         )
 
-        window.title = "設定"
+        window.title = "Paramètres"
         window.contentView = NSHostingView(rootView: contentView)
         window.center()
 
@@ -343,29 +343,30 @@ final class MenuBarController: NSObject, ObservableObject {
         NSApp.activate(ignoringOtherApps: true)
     }
 
-    // MARK: - Global Hotkeys
+    // MARK: - Raccourcis clavier globaux
 
     private func setupGlobalHotkeys() {
-        // 履歴ウィンドウを開くショートカット（設定から取得）
+        // Raccourci pour ouvrir la fenêtre d'historique (depuis les paramètres)
         NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
             guard let self = self else { return event }
 
             let shortcut = self.settingsManager.shortcutOpenHistory
 
-            // ショートカットが設定されていて、イベントと一致するか確認
+            // Vérifier si le raccourci correspond à l'événement
             if !shortcut.isDisabled && shortcut.matches(event: event) {
                 self.openHistoryWindow()
-                return nil  // イベントを消費
+                return nil  // Consommer l'événement
             }
 
             return event
         }
 
-        // ショートカット設定の変更を監視（再起動が必要）
+        // Surveillance des changements de raccourci (redémarrage nécessaire)
         settingsManager.$shortcutOpenHistory
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                // 設定変更時の処理（必要に応じて実装）
+            .sink { _ in
+                // Traitement lors du changement de paramètre (implémenter si nécessaire)
+                // Note: redémarrage requis pour appliquer les nouveaux raccourcis
             }
             .store(in: &cancellables)
     }
@@ -373,7 +374,7 @@ final class MenuBarController: NSObject, ObservableObject {
 
 // MARK: - Hover Handler
 
-/// NSTrackingAreaのownerとして使用するヘルパークラス
+/// Classe helper utilisée comme owner de NSTrackingArea
 final class HoverHandler: NSResponder {
     private let onMouseEntered: () -> Void
     private let onMouseExited: () -> Void
