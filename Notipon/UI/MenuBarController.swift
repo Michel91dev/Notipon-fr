@@ -381,7 +381,6 @@ final class MenuBarController: NSObject, ObservableObject {
             NSEvent.removeMonitor(monitor)
         }
         hoverTimer?.invalidate()
-        pollingTimer?.invalidate()
     }
 }
 
