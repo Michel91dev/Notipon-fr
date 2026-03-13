@@ -1,7 +1,7 @@
 import Foundation
 import GRDB
 
-/// 通知データモデル
+/// Modèle de données de notification
 struct NotificationItem: Identifiable, Hashable {
     var id: String
     var appIdentifier: String
@@ -13,7 +13,7 @@ struct NotificationItem: Identifiable, Hashable {
     var isRead: Bool
     var threadIdentifier: String?
     var categoryIdentifier: String?
-    var imageData: Data?  // ジャケット画像など
+    var imageData: Data?  // Image de pochette, etc.
 
     init(
         id: String = UUID().uuidString,
@@ -83,7 +83,7 @@ extension NotificationItem: TableRecord, FetchableRecord, PersistableRecord {
 // MARK: - Convenience Properties
 
 extension NotificationItem {
-    /// アプリアイコン名（SF Symbols）
+    /// Nom de l'icône d'application (SF Symbols)
     var appIconName: String {
         switch appIdentifier.lowercased() {
         case let id where id.contains("slack"):
@@ -105,7 +105,7 @@ extension NotificationItem {
         }
     }
 
-    /// アプリカラー
+    /// Couleur de l'application
     var appColor: String {
         switch appIdentifier.lowercased() {
         case let id where id.contains("slack"):
@@ -123,37 +123,37 @@ extension NotificationItem {
         }
     }
 
-    /// 相対時間表示
+    /// Affichage de l'heure relative
     var relativeTimeString: String {
         let formatter = RelativeDateTimeFormatter()
         formatter.unitsStyle = .abbreviated
-        formatter.locale = Locale(identifier: "ja_JP")
+        formatter.locale = Locale(identifier: "fr_FR")
         return formatter.localizedString(for: timestamp, relativeTo: Date())
     }
 
-    /// 時刻表示（HH:mm形式）
+    /// Affichage de l'heure (format HH:mm)
     var timeString: String {
         let formatter = DateFormatter()
         formatter.dateFormat = "HH:mm"
         return formatter.string(from: timestamp)
     }
 
-    /// 日付表示
+    /// Affichage de la date
     var dateString: String {
         let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "ja_JP")
+        formatter.locale = Locale(identifier: "fr_FR")
 
         if Calendar.current.isDateInToday(timestamp) {
-            return "今日"
+            return "Aujourd'hui"
         } else if Calendar.current.isDateInYesterday(timestamp) {
-            return "昨日"
+            return "Hier"
         } else {
-            formatter.dateFormat = "M月d日"
+            formatter.dateFormat = "d MMMM"
             return formatter.string(from: timestamp)
         }
     }
 
-    /// 日時表示（日付 + 時刻）
+    /// Affichage de la date et heure (date + heure)
     var dateTimeString: String {
         return "\(dateString) \(timeString)"
     }
@@ -166,29 +166,29 @@ extension NotificationItem {
         NotificationItem(
             appIdentifier: "com.tinyspeck.slackmacgap",
             appName: "Slack",
-            title: "田中太郎",
-            body: "会議の件ですが、明日の14時から会議室Bで打ち合わせしましょう。",
+            title: "Jean Dupont",
+            body: "Concernant la réunion, demain à 14h en salle B pour en discuter.",
             timestamp: Date().addingTimeInterval(-300)
         ),
         NotificationItem(
             appIdentifier: "com.apple.mail",
             appName: "Mail",
-            title: "Amazon.co.jp",
-            body: "ご注文の商品が発送されました。配達予定日: 1月5日",
+            title: "Amazon.fr",
+            body: "Votre commande a été expédiée. Date de livraison prévue : 5 janvier",
             timestamp: Date().addingTimeInterval(-1200)
         ),
         NotificationItem(
             appIdentifier: "com.hnc.Discord",
             appName: "Discord",
             title: "#dev - Vibe Coding Server",
-            body: "@user 確認お願いします",
+            body: "@user Merci de vérifier svp",
             timestamp: Date().addingTimeInterval(-2400)
         ),
         NotificationItem(
             appIdentifier: "com.apple.iCal",
             appName: "Calendar",
-            title: "15:00 ミーティング",
-            body: "Zoom リンク: https://zoom.us/j/...",
+            title: "15:00 Réunion",
+            body: "Lien Zoom : https://zoom.us/j/...",
             timestamp: Date().addingTimeInterval(-3600),
             isRead: true
         ),
@@ -196,7 +196,7 @@ extension NotificationItem {
             appIdentifier: "com.tinyspeck.slackmacgap",
             appName: "Slack",
             title: "#general",
-            body: "新しいメッセージがあります",
+            body: "Vous avez un nouveau message",
             timestamp: Date().addingTimeInterval(-7200),
             isRead: true
         )
